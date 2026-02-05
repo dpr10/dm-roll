@@ -27,12 +27,13 @@ Hooks.once('init', async function () {
     },
     default: 'self',
   });
+
+  // Register the hook early so it fires during scene control setup
+  initializeUI();
 });
 
 Hooks.once('ready', async function () {
   console.log(`${MODULE_ID} | Ready`);
-
-  initializeUI();
 
   /**
    * Allows the DM to roll an ability check for specified players.

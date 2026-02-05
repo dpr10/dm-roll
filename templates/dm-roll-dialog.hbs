@@ -1,6 +1,7 @@
 <div class="form-group">
   <label>{{localize "ABILITY_LABEL"}}:</label>
-  <select id="ability-select">
+  <select name="ability" required>
+    <option value="">{{localize "SELECT_ABILITY"}}</option>
     {{#each abilityChoices}}
       <option value="{{@key}}">{{this}}</option>
     {{/each}}
@@ -8,7 +9,7 @@
 </div>
 <div class="form-group">
   <label>{{localize "PLAYERS_LABEL"}}:</label>
-  <select id="player-select" multiple>
+  <select name="players" multiple required>
     {{#each players}}
       <option value="{{this.value}}">{{this.label}}</option>
     {{/each}}
