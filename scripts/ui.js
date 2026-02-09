@@ -1,4 +1,7 @@
+import { dmRollAbilityForPlayers } from './core.js';
+
 const MODULE_ID = 'dm-roll';
+let dmRollDialog = null;
 
 async function openDmRollDialog() {
   if (!game.user.isGM) {
@@ -6,9 +9,13 @@ async function openDmRollDialog() {
     return;
   }
 
-  const players = game.users.filter(u => !u.isGM).map(u => ({ value: u.id, label: u.name }));
+  // Prevent opening multiple instances
+  if (dmRollDialog) {
+    dmRollDialog.bringToFront();
+    return;
+  }
 
-  console.log(`${MODULE_ID} | Available players:`, players);
+  const players = game.users.filter(u => u.character && !u.isGM).map(u => ({ value: u.id, label: u.name }));
 
   if (players.length === 0) {
     ui.notifications.warn('No players found to roll for.');
@@ -42,34 +49,32 @@ async function openDmRollDialog() {
     content: content,
     buttons: [
       {
-        default: true,
         action: 'roll',
         label: 'Roll',
+        callback: async (_1, _2, dialogEl) => {
+          const formData = new FormData(dialogEl.element.querySelector('form'));
+          const abilityId = formData.get('ability');
+          const selectedPlayerIds = formData.getAll('players');
+
+          if (!abilityId || selectedPlayerIds.length === 0) {
+            ui.notifications.warn('Please select an ability and at least one player.');
+            return false; // Keep dialog open
+          }
+
+          await dmRollAbilityForPlayers(abilityId, selectedPlayerIds);
+        },
+        default: true,
       },
       {
         action: 'cancel',
         label: 'Cancel',
       },
     ],
-    form: {
-      handler: async formData => {
-        const abilityId = formData.get('ability');
-        const selectedPlayerIds = formData.getAll('players');
+  });
 
-        console.log(`${MODULE_ID} | Dialog submitted - abilityId:`, abilityId, 'selectedPlayerIds:', selectedPlayerIds);
-
-        if (!abilityId || selectedPlayerIds.length === 0) {
-          ui.notifications.warn('Please select an ability and at least one player.');
-          return false;
-        }
-
-        console.log(
-          `${MODULE_ID} | Calling dmRollAbilityForPlayers with ability: ${abilityId}, players: ${selectedPlayerIds.join(', ')}`
-        );
-
-        await window.dmRollAbilityForPlayers(abilityId, selectedPlayerIds);
-      },
-    },
+  dmRollDialog = dialog;
+  dialog.addEventListener('close', () => {
+    dmRollDialog = null;
   });
 
   await dialog.render(true);

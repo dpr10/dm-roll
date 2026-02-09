@@ -1,6 +1,6 @@
-import { initializeUI } from './ui/ui.js';
+import { initializeUI } from './ui.js';
+import { dmRollAbilityForPlayers } from './core.js';
 
-// This is your module's main script file.
 const MODULE_ID = 'dm-roll';
 
 Hooks.once('init', async function () {
@@ -28,58 +28,14 @@ Hooks.once('init', async function () {
     default: 'self',
   });
 
-  // Register the hook early so it fires during scene control setup
   initializeUI();
 });
 
 Hooks.once('ready', async function () {
   console.log(`${MODULE_ID} | Ready`);
 
-  /**
-   * Allows the DM to roll an ability check for specified players.
-   * @param {string} abilityId The ID of the ability to roll (e.g., "str", "dex").
-   * @param {string[]} playerIds An array of user IDs for whom to roll.
-   */
-  window.dmRollAbilityForPlayers = async (abilityId, playerIds) => {
-    if (!game.settings.get(MODULE_ID, 'enableModule')) {
-      ui.notifications.warn(`${MODULE_ID} is disabled.`);
-      return;
-    }
-
-    if (!game.user.isGM) {
-      ui.notifications.error(`You are not the GM.`);
-      return;
-    }
-
-    if (!abilityId) {
-      ui.notifications.error(`An ability ID must be provided.`);
-      return;
-    }
-
-    const rollVisibility = game.settings.get(MODULE_ID, 'rollVisibility');
-    const whisperTargets = rollVisibility === 'self' ? [game.user.id] : [];
-
-    for (const userId of playerIds) {
-      const user = game.users.get(userId);
-      if (!user || !user.character) {
-        console.warn(`${MODULE_ID} | User ${userId} not found or has no assigned character.`);
-        continue;
-      }
-
-      const actor = user.character;
-      // Assuming dnd5e system for ability check rolling. This might need to be abstracted for other systems.
-      try {
-        await actor.rollAbilityTest(abilityId, {
-          chatMessage: true,
-          whisper: whisperTargets,
-        });
-        ui.notifications.info(`Rolled ${abilityId} for ${user.name}.`);
-      } catch (error) {
-        console.error(`${MODULE_ID} | Error rolling ability for ${user.name}:`, error);
-        ui.notifications.error(`Failed to roll ${abilityId} for ${user.name}. See console for details.`);
-      }
-    }
-  };
+  // Expose on window for macro compatibility
+  window.dmRollAbilityForPlayers = dmRollAbilityForPlayers;
 
   /*
    * Example Macro for DM Roll:

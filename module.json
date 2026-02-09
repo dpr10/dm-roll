@@ -14,7 +14,8 @@
   },
   "esmodules": [
     "scripts/module.js",
-    "scripts/ui/ui.js"
+    "scripts/core.js",
+    "scripts/ui.js"
   ],
   "languages": [
     {
