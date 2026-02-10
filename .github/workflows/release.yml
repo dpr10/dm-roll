@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Substitute the Manifest and Download URLs in the module.json
+      - name: Substitute Manifest and Download URLs
+        id: sub_manifest_urls
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: 'module.json'
+        env:
+          version: ${{ github.event.release.tag_name }}
+          url: ${{ github.event.release.html_url }}
+          manifest: https://github.com/${{ github.repository }}/releases/latest/download/module.json
+          download: https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/dm-roll.zip
+
+      # Create the zip file
+      - name: Create ZIP
+        run: |
+          zip -r ./dm-roll.zip \
+          module.json \
+          lang/ \
+          scripts/ \
+          templates/ \
+          README.md \
+          LICENSE \
+          CHANGELOG.md \
+          -x "*.DS_Store"
+
+      # Create and upload the release asset
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./dm-roll.zip
+          asset_name: dm-roll.zip
+          asset_label: Module Files
+          asset_content_type: application/zip
+
+      # Update the manifest in the repo
+      - name: Update manifest
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./module.json
+          asset_name: module.json
+          asset_label: Manifest File
+          asset_content_type: application/json
