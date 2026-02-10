@@ -22,6 +22,7 @@ async function openDmRollDialog() {
     return;
   }
 
+  // Define abilities and skills based on D&D 5e system
   const abilityChoices = {
     str: 'Strength',
     dex: 'Dexterity',
@@ -31,8 +32,50 @@ async function openDmRollDialog() {
     cha: 'Charisma',
   };
 
+  // Define skills grouped by ability based on D&D 5e system
+  const skillChoices = {
+    // Strength-based skills
+    'ath': { label: 'Athletics', ability: 'str' },
+
+    // Dexterity-based skills
+    'acr': { label: 'Acrobatics', ability: 'dex' },
+    'soh': { label: 'Sleight of Hand', ability: 'dex' },
+    'ste': { label: 'Stealth', ability: 'dex' },
+
+    // Intelligence-based skills
+    'arc': { label: 'Arcana', ability: 'int' },
+    'his': { label: 'History', ability: 'int' },
+    'inv': { label: 'Investigation', ability: 'int' },
+    'nat': { label: 'Nature', ability: 'int' },
+    'rel': { label: 'Religion', ability: 'int' },
+
+    // Wisdom-based skills
+    'ani': { label: 'Animal Handling', ability: 'wis' },
+    'ins': { label: 'Insight', ability: 'wis' },
+    'med': { label: 'Medicine', ability: 'wis' },
+    'prc': { label: 'Perception', ability: 'wis' },
+    'sur': { label: 'Survival', ability: 'wis' },
+
+    // Charisma-based skills
+    'dec': { label: 'Deception', ability: 'cha' },
+    'itm': { label: 'Intimidation', ability: 'cha' },
+    'prf': { label: 'Performance', ability: 'cha' },
+    'per': { label: 'Persuasion', ability: 'cha' },
+  };
+
+  // Group skills by ability for the template
+  const skillsByAbility = {};
+  for (const [skillId, skillData] of Object.entries(skillChoices)) {
+    if (!skillsByAbility[skillData.ability]) {
+      skillsByAbility[skillData.ability] = {};
+    }
+    skillsByAbility[skillData.ability][skillId] = skillData;
+  }
+
   const templateData = {
     abilityChoices,
+    skillChoices,
+    skillsByAbility,
     players,
   };
 
@@ -53,15 +96,25 @@ async function openDmRollDialog() {
         label: 'Roll',
         callback: async (_1, _2, dialogEl) => {
           const formData = new FormData(dialogEl.element.querySelector('form'));
-          const abilityId = formData.get('ability');
+          const abilitySkillValue = formData.get('abilitySkill');
           const selectedPlayerIds = formData.getAll('players');
 
-          if (!abilityId || selectedPlayerIds.length === 0) {
-            ui.notifications.warn('Please select an ability and at least one player.');
+          if (!abilitySkillValue || selectedPlayerIds.length === 0) {
+            ui.notifications.warn('Please select an ability or skill and at least one player.');
             return false; // Keep dialog open
           }
 
-          await dmRollAbilityForPlayers(abilityId, selectedPlayerIds);
+          // Parse the selected value to determine if it's an ability or skill
+          const [type, id] = abilitySkillValue.split(':');
+
+          if (type === 'ability') {
+            await dmRollAbilityForPlayers(id, selectedPlayerIds);
+          } else if (type === 'skill') {
+            await dmRollSkillForPlayers(id, selectedPlayerIds);
+          } else {
+            ui.notifications.error('Invalid selection. Please select an ability or skill.');
+            return false; // Keep dialog open
+          }
         },
         default: true,
       },

@@ -1,5 +1,14 @@
 {
   "ABILITY_LABEL": "Ability",
+  "ABILITY_SKILL_LABEL": "Ability/Skill",
+  "ABILITIES_LABEL": "Abilities",
+  "SKILLS_LABEL": "Skills",
+  "STRENGTH_SKILLS_LABEL": "Strength Skills",
+  "DEXTERITY_SKILLS_LABEL": "Dexterity Skills",
+  "INTELLIGENCE_SKILLS_LABEL": "Intelligence Skills",
+  "WISDOM_SKILLS_LABEL": "Wisdom Skills",
+  "CHARISMA_SKILLS_LABEL": "Charisma Skills",
   "PLAYERS_LABEL": "Players",
-  "SELECT_ABILITY": "Select an Ability..."
+  "SELECT_ABILITY": "Select an Ability...",
+  "SELECT_ABILITY_OR_SKILL": "Select an Ability or Skill..."
 }
