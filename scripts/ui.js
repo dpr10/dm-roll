@@ -39,7 +39,7 @@ async function openDmRollDialog() {
 
     // Dexterity-based skills
     acr: { label: 'Acrobatics', ability: 'dex' },
-    soh: { label: 'Sleight of Hand', ability: 'dex' },
+    slt: { label: 'Sleight of Hand', ability: 'dex' },
     ste: { label: 'Stealth', ability: 'dex' },
 
     // Intelligence-based skills
