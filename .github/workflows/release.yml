@@ -1,8 +1,9 @@
 name: Release
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -10,17 +11,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Get the tag name and format it properly
+      - name: Get tag
+        id: tag
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
       # Substitute the Manifest and Download URLs in the module.json
       - name: Substitute Manifest and Download URLs
-        id: sub_manifest_urls
         uses: microsoft/variable-substitution@v1
         with:
           files: 'module.json'
         env:
-          version: ${{ github.event.release.tag_name }}
-          url: ${{ github.event.release.html_url }}
+          version: ${{ steps.tag.outputs.tag }}
+          url: https://github.com/${{ github.repository }}/releases/tag/${{ steps.tag.outputs.tag }}
           manifest: https://github.com/${{ github.repository }}/releases/latest/download/module.json
-          download: https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/dm-roll.zip
+          download: https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/dm-roll.zip
 
       # Create the zip file
       - name: Create ZIP
@@ -35,27 +40,76 @@ jobs:
           CHANGELOG.md \
           -x "*.DS_Store"
 
-      # Create and upload the release asset
-      - name: Upload Release Asset
-        id: upload-release-asset
+      # Extract changelog for this version
+      - name: Extract changelog
+        id: changelog
+        run: |
+          # Find the section for the current tag in CHANGELOG.md
+          TAG_VERSION="${{ steps.tag.outputs.tag }}"
+          # Remove 'v' prefix if present for comparison
+          VERSION="${TAG_VERSION#v}"
+
+          # Extract the changelog section for this version
+          START_LINE=$(grep -n "^## \[${VERSION}\]" CHANGELOG.md | cut -d: -f1)
+          if [ -n "$START_LINE" ]; then
+            # Find the next version header after the current one
+            NEXT_HEADER=$(tail -n +$((START_LINE + 1)) CHANGELOG.md | grep -n "^## \[" | head -n1 | cut -d: -f1)
+
+            if [ -n "$NEXT_HEADER" ]; then
+              END_LINE=$((START_LINE + NEXT_HEADER - 1))
+              sed -n "${START_LINE},${END_LINE}p" CHANGELOG.md > release_notes.md
+            else
+              # If no next header, take from start line to end of file
+              tail -n +$START_LINE CHANGELOG.md > release_notes.md
+            fi
+          else
+            # If the version is not found, create a default message
+            echo "Changelog section for version ${VERSION} not found in CHANGELOG.md" > release_notes.md
+          fi
+
+          # Store the changelog content
+          RELEASE_NOTES=$(cat release_notes.md)
+          echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      # Print the changelog to the action log for reference
+      - name: Display changelog
+        run: |
+          echo "Changelog for ${{ steps.tag.outputs.tag }}:"
+          cat release_notes.md
+
+      # Create a GitHub release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          release_name: Release ${{ steps.tag.outputs.tag }}
+          body: ${{ steps.changelog.outputs.release_notes }}
+          draft: false
+          prerelease: false
+
+      # Upload the ZIP file to the release
+      - name: Upload ZIP Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./dm-roll.zip
           asset_name: dm-roll.zip
-          asset_label: Module Files
           asset_content_type: application/zip
 
-      # Update the manifest in the repo
-      - name: Update manifest
+      # Upload the module.json manifest to the release
+      - name: Upload Manifest Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./module.json
           asset_name: module.json
-          asset_label: Manifest File
           asset_content_type: application/json
