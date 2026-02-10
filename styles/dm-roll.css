@@ -5,9 +5,15 @@
   min-height: 150px;
   min-width: 250px;
   font-size: 14px;
-  /* Improve visual feedback for selected options */
-  outline: 2px solid #888;
-  border-radius: 4px;
+  /* Match Foundry's select styling */
+  background: #eeede0;
+  border: 1px solid #7a7971;
+  border-radius: 3px;
+  padding: 3px;
+  color: #2f2929;
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
+  outline: none;
+  /* Note: Multiple select doesn't support custom dropdown arrows in most browsers */
 }
 
 /* Style for selected options in the players selection to match Foundry design */
@@ -23,10 +29,85 @@
   background-color: #a7c6dd;
 }
 
-/* Style for the ability/skill selection */
-.ability-skill-select {
+/* Custom select wrapper */
+.custom-select-wrapper {
+  position: relative;
+  width: 250px;
+}
+
+/* Custom select trigger (the visible part) */
+.custom-select-trigger {
   min-width: 250px;
   font-size: 14px;
+  background: #eeede0;
+  border: 1px solid #7a7971;
+  border-radius: 3px;
+  padding: 5px;
+  color: #2f2929;
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Arrow styling */
+.arrow {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Custom options container */
+.custom-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #eeede0;
+  border: 1px solid #7a7971;
+  border-top: none;
+  border-radius: 0 0 3px 3px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Option group labels */
+.optgroup-label {
+  padding: 5px 8px;
+  font-weight: bold;
+  color: #5d5d5d;
+  background-color: #dcdcd5;
+  border-bottom: 1px solid #c9c7b8;
+  font-size: 12px;
+}
+
+/* Individual options */
+.option {
+  padding: 5px 8px;
+  cursor: pointer;
+  color: #2f2929;
+  border-bottom: 1px solid #dcdcd5;
+}
+
+.option:last-child {
+  border-bottom: none;
+}
+
+.option:hover {
+  background-color: #a7c6dd;
+}
+
+.option.selected {
+  background-color: #8bc8f5;
+  color: #ffffff;
+  font-weight: bold;
 }
 
 /* Container for player selection */

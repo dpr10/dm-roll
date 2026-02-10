@@ -95,9 +95,12 @@ async function openDmRollDialog() {
         action: 'roll',
         label: 'Roll',
         callback: async (_1, _2, dialogEl) => {
-          const formData = new FormData(dialogEl.element.querySelector('form'));
-          const abilitySkillValue = formData.get('abilitySkill');
-          const selectedPlayerIds = formData.getAll('players');
+          // Get the value from the hidden input since we're using a custom dropdown
+          const hiddenInput = dialogEl.element.querySelector('input[name="abilitySkill"]');
+          const abilitySkillValue = hiddenInput ? hiddenInput.value : null;
+          const selectedPlayerIds = Array.from(
+            dialogEl.element.querySelector('select[name="players"]').selectedOptions
+          ).map(option => option.value);
 
           if (!abilitySkillValue || selectedPlayerIds.length === 0) {
             ui.notifications.warn('Please select an ability or skill and at least one player.');
@@ -137,6 +140,50 @@ async function openDmRollDialog() {
     const selectAllBtn = dialog.element.querySelector('.select-all-btn');
     const clearSelectionBtn = dialog.element.querySelector('.clear-selection-btn');
     const playersSelect = dialog.element.querySelector('.players-select');
+
+    // Handle custom ability/skill dropdown
+    const customSelectTrigger = dialog.element.querySelector('.custom-select-trigger');
+    const customSelectOptions = dialog.element.querySelector('.custom-options');
+    const selectedValueSpan = dialog.element.querySelector('.selected-value');
+    const hiddenInput = dialog.element.querySelector('.ability-skill-hidden-input');
+    const arrow = dialog.element.querySelector('.arrow');
+
+    if (customSelectTrigger && customSelectOptions) {
+      // Toggle dropdown visibility when clicking the trigger
+      customSelectTrigger.onclick = () => {
+        const isOpen = customSelectOptions.style.display !== 'none';
+        customSelectOptions.style.display = isOpen ? 'none' : 'block';
+        arrow.classList.toggle('open', !isOpen);
+      };
+
+      // Handle option selection
+      const options = dialog.element.querySelectorAll('.option');
+      options.forEach(option => {
+        option.onclick = () => {
+          // Update the hidden input value
+          hiddenInput.value = option.dataset.value;
+
+          // Update the displayed value
+          selectedValueSpan.textContent = option.textContent;
+
+          // Close the dropdown
+          customSelectOptions.style.display = 'none';
+          arrow.classList.remove('open');
+
+          // Highlight selected option
+          options.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+        };
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', event => {
+        if (!customSelectTrigger.contains(event.target) && !customSelectOptions.contains(event.target)) {
+          customSelectOptions.style.display = 'none';
+          arrow.classList.remove('open');
+        }
+      });
+    }
 
     if (selectAllBtn && playersSelect) {
       // Remove any existing event listeners to avoid duplicates
