@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-02-10
+
+### Added
+
+- Player-initiated roll system where GM sends roll requests to players
+- Private messaging system for roll requests
+- Template-based chat message rendering
+- Roll visibility settings enforcement for player rolls
+
+### Changed
+
+- Updated roll logic to send requests to players instead of direct rolls
+- Migrated chat content to Handlebars template system
+
 ## [1.1.2] - 2026-02-10
 
 ### Added
