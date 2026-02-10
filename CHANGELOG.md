@@ -7,17 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-02-10
+
+### Added
+
+- Custom dropdown menu for ability/skill selection
+- Enhanced visual feedback for selected options
+- Foundry-style button styling
+
+### Changed
+
+- Replaced native select elements with custom Foundry-styled dropdowns
+- Improved dialog layout and user experience
+
 ## [1.1.0] - 2026-02-10
+
+- No changes
 
 ### Added
 
 - Skills support with grouping by ability
+- Improved UI with better player selection area
 - "Select All" and "Clear" buttons for player selection
 
 ### Changed
 
 - Separated template code from UI logic
-- Improved dialog layout and user experience
 - Updated to FoundryVTT v13 compatible API
 - Refactored core logic for better maintainability
 
