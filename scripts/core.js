@@ -35,6 +35,11 @@ export async function dmRollAbilityForPlayers(abilityId, playerIds) {
       continue;
     }
 
+    if (!user.active) {
+      console.warn(`${MODULE_ID} | User ${userId} is not active (online). Skipping roll.`);
+      continue;
+    }
+
     console.log(`${MODULE_ID} | Rolling ${abilityId} for ${user.name}`);
 
     const actor = user.character;
@@ -114,6 +119,11 @@ export async function dmRollSkillForPlayers(skillId, playerIds) {
     const user = game.users.get(userId);
     if (!user || !user.character) {
       console.warn(`${MODULE_ID} | User ${userId} not found or has no assigned character.`);
+      continue;
+    }
+
+    if (!user.active) {
+      console.warn(`${MODULE_ID} | User ${userId} is not active (online). Skipping roll.`);
       continue;
     }
 

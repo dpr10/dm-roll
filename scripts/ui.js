@@ -15,7 +15,7 @@ async function openDmRollDialog() {
     return;
   }
 
-  const players = game.users.filter(u => u.character && !u.isGM).map(u => ({ value: u.id, label: u.name }));
+  const players = game.users.filter(u => u.character && !u.isGM && u.active).map(u => ({ value: u.id, label: u.name }));
 
   if (players.length === 0) {
     ui.notifications.warn('No players found to roll for.');
