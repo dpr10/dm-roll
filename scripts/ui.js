@@ -35,32 +35,32 @@ async function openDmRollDialog() {
   // Define skills grouped by ability based on D&D 5e system
   const skillChoices = {
     // Strength-based skills
-    'ath': { label: 'Athletics', ability: 'str' },
+    ath: { label: 'Athletics', ability: 'str' },
 
     // Dexterity-based skills
-    'acr': { label: 'Acrobatics', ability: 'dex' },
-    'soh': { label: 'Sleight of Hand', ability: 'dex' },
-    'ste': { label: 'Stealth', ability: 'dex' },
+    acr: { label: 'Acrobatics', ability: 'dex' },
+    soh: { label: 'Sleight of Hand', ability: 'dex' },
+    ste: { label: 'Stealth', ability: 'dex' },
 
     // Intelligence-based skills
-    'arc': { label: 'Arcana', ability: 'int' },
-    'his': { label: 'History', ability: 'int' },
-    'inv': { label: 'Investigation', ability: 'int' },
-    'nat': { label: 'Nature', ability: 'int' },
-    'rel': { label: 'Religion', ability: 'int' },
+    arc: { label: 'Arcana', ability: 'int' },
+    his: { label: 'History', ability: 'int' },
+    inv: { label: 'Investigation', ability: 'int' },
+    nat: { label: 'Nature', ability: 'int' },
+    rel: { label: 'Religion', ability: 'int' },
 
     // Wisdom-based skills
-    'ani': { label: 'Animal Handling', ability: 'wis' },
-    'ins': { label: 'Insight', ability: 'wis' },
-    'med': { label: 'Medicine', ability: 'wis' },
-    'prc': { label: 'Perception', ability: 'wis' },
-    'sur': { label: 'Survival', ability: 'wis' },
+    ani: { label: 'Animal Handling', ability: 'wis' },
+    ins: { label: 'Insight', ability: 'wis' },
+    med: { label: 'Medicine', ability: 'wis' },
+    prc: { label: 'Perception', ability: 'wis' },
+    sur: { label: 'Survival', ability: 'wis' },
 
     // Charisma-based skills
-    'dec': { label: 'Deception', ability: 'cha' },
-    'itm': { label: 'Intimidation', ability: 'cha' },
-    'prf': { label: 'Performance', ability: 'cha' },
-    'per': { label: 'Persuasion', ability: 'cha' },
+    dec: { label: 'Deception', ability: 'cha' },
+    itm: { label: 'Intimidation', ability: 'cha' },
+    prf: { label: 'Performance', ability: 'cha' },
+    per: { label: 'Persuasion', ability: 'cha' },
   };
 
   // Group skills by ability for the template
@@ -131,6 +131,39 @@ async function openDmRollDialog() {
   });
 
   await dialog.render(true);
+
+  // Attach event listeners after the dialog is rendered
+  setTimeout(() => {
+    const selectAllBtn = dialog.element.querySelector('.select-all-btn');
+    const clearSelectionBtn = dialog.element.querySelector('.clear-selection-btn');
+    const playersSelect = dialog.element.querySelector('.players-select');
+
+    if (selectAllBtn && playersSelect) {
+      // Remove any existing event listeners to avoid duplicates
+      selectAllBtn.onclick = null;
+      selectAllBtn.onclick = event => {
+        event.preventDefault();
+        event.stopPropagation();
+        // Select all options in the players select
+        Array.from(playersSelect.options).forEach(option => {
+          option.selected = true;
+        });
+      };
+    }
+
+    if (clearSelectionBtn && playersSelect) {
+      // Remove any existing event listeners to avoid duplicates
+      clearSelectionBtn.onclick = null;
+      clearSelectionBtn.onclick = event => {
+        event.preventDefault();
+        event.stopPropagation();
+        // Clear all selections in the players select
+        Array.from(playersSelect.options).forEach(option => {
+          option.selected = false;
+        });
+      };
+    }
+  }, 100); // Slight delay to ensure DOM is fully ready
 }
 
 export function initializeUI() {

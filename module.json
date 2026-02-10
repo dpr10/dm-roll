@@ -16,7 +16,9 @@
     "scripts/core.js",
     "scripts/ui.js"
   ],
-  "styles": [],
+  "styles": [
+    "styles/dm-roll.css"
+  ],
   "languages": [
     {
       "lang": "en",

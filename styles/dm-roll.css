@@ -1,0 +1,90 @@
+/* DM Roll Module Styles */
+
+/* Increase the height of the players selection area */
+.players-select {
+  min-height: 150px;
+  min-width: 250px;
+  font-size: 14px;
+  /* Improve visual feedback for selected options */
+  outline: 2px solid #888;
+  border-radius: 4px;
+}
+
+/* Style for selected options in the players selection to match Foundry design */
+.players-select option:checked,
+.players-select option[selected] {
+  background-color: #8bc8f5 !important;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+/* Style for hovered options in the players selection to match Foundry design */
+.players-select option:hover {
+  background-color: #a7c6dd;
+}
+
+/* Style for the ability/skill selection */
+.ability-skill-select {
+  min-width: 250px;
+  font-size: 14px;
+}
+
+/* Container for player selection */
+.players-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+/* Action buttons for player selection - positioned below the selection */
+.player-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.select-all-btn,
+.clear-selection-btn {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid #7a7971;
+  background: #c9c7b8;
+  color: #2f2929;
+  border-radius: 3px;
+  cursor: pointer;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+  font-weight: normal;
+}
+
+.select-all-btn:hover,
+.clear-selection-btn:hover {
+  background: #dfdcca;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+  color: #2f2929;
+}
+
+/* Form group spacing */
+.form-group {
+  margin-bottom: 15px;
+}
+
+/* Label styling */
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+/* Optgroup styling */
+.ability-skill-select optgroup {
+  font-weight: bold;
+  color: #333;
+}
+
+.ability-skill-select option {
+  font-weight: normal;
+  padding: 2px 5px;
+  color: #000;
+}

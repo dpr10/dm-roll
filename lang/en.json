@@ -10,5 +10,9 @@
   "CHARISMA_SKILLS_LABEL": "Charisma Skills",
   "PLAYERS_LABEL": "Players",
   "SELECT_ABILITY": "Select an Ability...",
-  "SELECT_ABILITY_OR_SKILL": "Select an Ability or Skill..."
+  "SELECT_ABILITY_OR_SKILL": "Select an Ability or Skill...",
+  "SELECT_ALL_PLAYERS": "Select all players",
+  "CLEAR_SELECTION": "Clear selection",
+  "SELECT_ALL_BUTTON": "Select All",
+  "CLEAR_BUTTON": "Clear All"
 }
