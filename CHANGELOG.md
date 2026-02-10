@@ -7,9 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-02-10
+
+### Added
+
+- Skills support with grouping by ability
+- "Select All" and "Clear" buttons for player selection
+
+### Changed
+
+- Separated template code from UI logic
+- Improved dialog layout and user experience
+- Updated to FoundryVTT v13 compatible API
+- Refactored core logic for better maintainability
+
 ## [1.0.0] - 2026-02-04
 
 ### Added
+
 - Initial release of DM Roll module
 - GM-controlled ability checks for players
 - Configurable roll visibility settings
