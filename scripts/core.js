@@ -194,14 +194,27 @@ export async function handlePlayerRoll(abilityId, userId, type = 'ability') {
     const roll = new Roll(rollFormula, actor.getRollData());
     await roll.evaluate({ async: true });
 
-    // Create the chat message - make it public
+    // Determine roll visibility based on module settings
+    const rollVisibility = game.settings.get(MODULE_ID, 'rollVisibility');
+    const isPrivate = rollVisibility === 'self';
+
+    // Create the chat message with appropriate visibility
     const chatData = {
       user: game.user.id,
       speaker: ChatMessage.getSpeaker({ actor: actor }),
       flavor: rollLabel,
       rolls: [roll],
-      rollMode: CONST.DICE_ROLL_MODES.PUBLIC, // Public roll
     };
+
+    // Apply visibility settings
+    if (isPrivate) {
+      // If private, whisper to the GM only
+      chatData.whisper = [game.users.find(u => u.isGM)?.id].filter(Boolean);
+      chatData.rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+    } else {
+      // If public, make it visible to all
+      chatData.rollMode = CONST.DICE_ROLL_MODES.PUBLIC;
+    }
 
     // Display the roll in chat
     await ChatMessage.create(chatData);
