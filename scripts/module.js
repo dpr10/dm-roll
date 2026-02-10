@@ -38,6 +38,33 @@ Hooks.once('ready', async function () {
   window.dmRollAbilityForPlayers = dmRollAbilityForPlayers;
   window.dmRollSkillForPlayers = dmRollSkillForPlayers;
 
+  // Add event listener for roll buttons in chat messages
+  Hooks.on('renderChatMessageHTML', (message, html, context) => {
+    // Add event listeners to ability roll buttons
+    const abilityRollButtons = html.querySelectorAll('.ability-roll-button');
+    abilityRollButtons.forEach(button => {
+      button.addEventListener('click', async event => {
+        const abilityId = event.currentTarget.dataset.ability;
+        const userId = event.currentTarget.dataset.userId;
+        await import('./core.js').then(module => {
+          module.handlePlayerRoll(abilityId, userId, 'ability');
+        });
+      });
+    });
+
+    // Add event listeners to skill roll buttons
+    const skillRollButtons = html.querySelectorAll('.skill-roll-button');
+    skillRollButtons.forEach(button => {
+      button.addEventListener('click', async event => {
+        const skillId = event.currentTarget.dataset.skill;
+        const userId = event.currentTarget.dataset.userId;
+        await import('./core.js').then(module => {
+          module.handlePlayerRoll(skillId, userId, 'skill');
+        });
+      });
+    });
+  });
+
   /*
    * Example Macro for DM Roll:
    * To use this module, create a new Macro in Foundry VTT with the following content:
