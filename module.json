@@ -10,15 +10,8 @@
       "url": "https://github.com/dpr10"
     }
   ],
-  "contributors": [],
-  "esmodules": [
-    "scripts/module.js",
-    "scripts/core.js",
-    "scripts/ui.js"
-  ],
-  "styles": [
-    "styles/dm-roll.css"
-  ],
+  "esmodules": ["scripts/module.js", "scripts/core.js", "scripts/ui.js"],
+  "styles": ["styles/dm-roll.css"],
   "languages": [
     {
       "lang": "en",
@@ -26,7 +19,6 @@
       "path": "lang/en.json"
     }
   ],
-  "manifestPlusVersion": "1.2.0",
   "compatibility": {
     "minimum": "10",
     "verified": "13",

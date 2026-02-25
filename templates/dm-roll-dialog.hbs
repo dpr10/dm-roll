@@ -1,42 +1,42 @@
 <div class='form-group'>
   <label>{{localize 'ABILITY_SKILL_LABEL'}}:</label>
   <div class='custom-select-wrapper'>
-    <input type='hidden' name='abilitySkill' required class='ability-skill-hidden-input'>
+    <input type='hidden' name='abilitySkill' required class='ability-skill-hidden-input' />
     <div class='custom-select-trigger ability-skill-select'>
       <span class='selected-value'>{{localize 'SELECT_ABILITY_OR_SKILL'}}</span>
       <span class='arrow'>▼</span>
     </div>
     <div class='custom-options ability-skill-options' style='display: none;'>
-      <div class='optgroup-label'>{{localize "ABILITIES_LABEL"}}</div>
+      <div class='optgroup-label'>{{localize 'ABILITIES_LABEL'}}</div>
       {{#each abilityChoices}}
         <div class='option ability-option' data-value='ability:{{@key}}'>{{this}}</div>
       {{/each}}
       {{#if skillsByAbility.str}}
-        <div class='optgroup-label'>{{localize "STRENGTH_SKILLS_LABEL"}}</div>
+        <div class='optgroup-label'>{{localize 'STRENGTH_SKILLS_LABEL'}}</div>
         {{#each skillsByAbility.str}}
           <div class='option skill-option' data-value='skill:{{@key}}'>{{this.label}}</div>
         {{/each}}
       {{/if}}
       {{#if skillsByAbility.dex}}
-        <div class='optgroup-label'>{{localize "DEXTERITY_SKILLS_LABEL"}}</div>
+        <div class='optgroup-label'>{{localize 'DEXTERITY_SKILLS_LABEL'}}</div>
         {{#each skillsByAbility.dex}}
           <div class='option skill-option' data-value='skill:{{@key}}'>{{this.label}}</div>
         {{/each}}
       {{/if}}
       {{#if skillsByAbility.int}}
-        <div class='optgroup-label'>{{localize "INTELLIGENCE_SKILLS_LABEL"}}</div>
+        <div class='optgroup-label'>{{localize 'INTELLIGENCE_SKILLS_LABEL'}}</div>
         {{#each skillsByAbility.int}}
           <div class='option skill-option' data-value='skill:{{@key}}'>{{this.label}}</div>
         {{/each}}
       {{/if}}
       {{#if skillsByAbility.wis}}
-        <div class='optgroup-label'>{{localize "WISDOM_SKILLS_LABEL"}}</div>
+        <div class='optgroup-label'>{{localize 'WISDOM_SKILLS_LABEL'}}</div>
         {{#each skillsByAbility.wis}}
           <div class='option skill-option' data-value='skill:{{@key}}'>{{this.label}}</div>
         {{/each}}
       {{/if}}
       {{#if skillsByAbility.cha}}
-        <div class='optgroup-label'>{{localize "CHARISMA_SKILLS_LABEL"}}</div>
+        <div class='optgroup-label'>{{localize 'CHARISMA_SKILLS_LABEL'}}</div>
         {{#each skillsByAbility.cha}}
           <div class='option skill-option' data-value='skill:{{@key}}'>{{this.label}}</div>
         {{/each}}
@@ -44,17 +44,26 @@
     </div>
   </div>
 </div>
-<div class='form-group players-selection'>
-  <label>{{localize 'ONLINE_PLAYERS_LABEL'}}:</label>
-  <div class='players-container'>
-    <select name='players' multiple required class='players-select'>
-      {{#each players}}
-        <option value='{{this.value}}'>{{this.label}}</option>
-      {{/each}}
+<div class='form-group targets-selection'>
+  <label>{{localize 'TARGETS_LABEL'}}:</label>
+  <div class='targets-container'>
+    <select name='targets' multiple required class='targets-select'>
+      <optgroup label='{{localize "ONLINE_PLAYERS_LABEL"}}'>
+        {{#each players}}
+          <option value='{{this.value}}' data-type='user'>{{this.label}}</option>
+        {{/each}}
+      </optgroup>
+      {{#if hasSelectedActors}}
+        <optgroup label='{{localize "SELECTED_TOKENS_LABEL"}}'>
+          {{#each selectedActors}}
+            <option value='{{this.value}}' data-type='actor'>{{this.label}}</option>
+          {{/each}}
+        </optgroup>
+      {{/if}}
     </select>
   </div>
 </div>
-<div class='player-actions'>
+<div class='target-actions'>
   <button type='button' class='select-all-btn' title='{{localize "SELECT_ALL_PLAYERS"}}'>{{localize
       'SELECT_ALL_BUTTON'
     }}</button>

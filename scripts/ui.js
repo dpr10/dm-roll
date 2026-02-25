@@ -1,4 +1,9 @@
-import { dmRollAbilityForPlayers } from './core.js';
+import {
+  dmRollAbilityForPlayers,
+  dmRollSkillForPlayers,
+  dmRollAbilityForActors,
+  dmRollSkillForActors,
+} from './core.js';
 
 const MODULE_ID = 'dm-roll';
 let dmRollDialog = null;
@@ -15,10 +20,24 @@ async function openDmRollDialog() {
     return;
   }
 
+  const gmCharacterId = game.user.character?.id;
+
+  const selectedTokens = canvas.tokens?.controlled || [];
+  const selectedActors = [];
+
+  for (const token of selectedTokens) {
+    if (!token.actor) continue;
+    if (token.actor.id === gmCharacterId) continue;
+    selectedActors.push({
+      value: token.actor.id,
+      label: token.actor.name,
+    });
+  }
+
   const players = game.users.filter(u => u.character && !u.isGM && u.active).map(u => ({ value: u.id, label: u.name }));
 
-  if (players.length === 0) {
-    ui.notifications.warn('No players found to roll for.');
+  if (players.length === 0 && selectedActors.length === 0) {
+    ui.notifications.warn('No players or tokens found to roll for.');
     return;
   }
 
@@ -77,6 +96,8 @@ async function openDmRollDialog() {
     skillChoices,
     skillsByAbility,
     players,
+    selectedActors,
+    hasSelectedActors: selectedActors.length > 0,
   };
 
   const content = await foundry.applications.handlebars.renderTemplate(
@@ -95,28 +116,41 @@ async function openDmRollDialog() {
         action: 'roll',
         label: 'Roll',
         callback: async (_1, _2, dialogEl) => {
-          // Get the value from the hidden input since we're using a custom dropdown
           const hiddenInput = dialogEl.element.querySelector('input[name="abilitySkill"]');
           const abilitySkillValue = hiddenInput ? hiddenInput.value : null;
-          const selectedPlayerIds = Array.from(
-            dialogEl.element.querySelector('select[name="players"]').selectedOptions
-          ).map(option => option.value);
 
-          if (!abilitySkillValue || selectedPlayerIds.length === 0) {
-            ui.notifications.warn('Please select an ability or skill and at least one player.');
-            return false; // Keep dialog open
+          const selectedOptions = Array.from(
+            dialogEl.element.querySelector('select[name="targets"]')?.selectedOptions || []
+          );
+
+          const selectedPlayerIds = selectedOptions.filter(opt => opt.dataset.type === 'user').map(opt => opt.value);
+
+          const selectedActorIds = selectedOptions.filter(opt => opt.dataset.type === 'actor').map(opt => opt.value);
+
+          if (!abilitySkillValue || (selectedPlayerIds.length === 0 && selectedActorIds.length === 0)) {
+            ui.notifications.warn('Please select an ability or skill and at least one target.');
+            return false;
           }
 
-          // Parse the selected value to determine if it's an ability or skill
           const [type, id] = abilitySkillValue.split(':');
 
           if (type === 'ability') {
-            await dmRollAbilityForPlayers(id, selectedPlayerIds);
+            if (selectedPlayerIds.length > 0) {
+              await dmRollAbilityForPlayers(id, selectedPlayerIds);
+            }
+            if (selectedActorIds.length > 0) {
+              await dmRollAbilityForActors(id, selectedActorIds);
+            }
           } else if (type === 'skill') {
-            await dmRollSkillForPlayers(id, selectedPlayerIds);
+            if (selectedPlayerIds.length > 0) {
+              await dmRollSkillForPlayers(id, selectedPlayerIds);
+            }
+            if (selectedActorIds.length > 0) {
+              await dmRollSkillForActors(id, selectedActorIds);
+            }
           } else {
             ui.notifications.error('Invalid selection. Please select an ability or skill.');
-            return false; // Keep dialog open
+            return false;
           }
         },
         default: true,
@@ -139,7 +173,7 @@ async function openDmRollDialog() {
   setTimeout(() => {
     const selectAllBtn = dialog.element.querySelector('.select-all-btn');
     const clearSelectionBtn = dialog.element.querySelector('.clear-selection-btn');
-    const playersSelect = dialog.element.querySelector('.players-select');
+    const targetsSelect = dialog.element.querySelector('.targets-select');
 
     // Handle custom ability/skill dropdown
     const customSelectTrigger = dialog.element.querySelector('.custom-select-trigger');
@@ -185,32 +219,28 @@ async function openDmRollDialog() {
       });
     }
 
-    if (selectAllBtn && playersSelect) {
-      // Remove any existing event listeners to avoid duplicates
+    if (selectAllBtn && targetsSelect) {
       selectAllBtn.onclick = null;
       selectAllBtn.onclick = event => {
         event.preventDefault();
         event.stopPropagation();
-        // Select all options in the players select
-        Array.from(playersSelect.options).forEach(option => {
+        Array.from(targetsSelect.options).forEach(option => {
           option.selected = true;
         });
       };
     }
 
-    if (clearSelectionBtn && playersSelect) {
-      // Remove any existing event listeners to avoid duplicates
+    if (clearSelectionBtn && targetsSelect) {
       clearSelectionBtn.onclick = null;
       clearSelectionBtn.onclick = event => {
         event.preventDefault();
         event.stopPropagation();
-        // Clear all selections in the players select
-        Array.from(playersSelect.options).forEach(option => {
+        Array.from(targetsSelect.options).forEach(option => {
           option.selected = false;
         });
       };
     }
-  }, 100); // Slight delay to ensure DOM is fully ready
+  }, 100);
 }
 
 export function initializeUI() {

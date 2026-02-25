@@ -136,6 +136,150 @@ export async function dmRollSkillForPlayers(skillId, playerIds) {
 }
 
 /**
+ * Allows the GM to roll an ability check directly for actors (e.g., NPCs, creatures).
+ * @param {string} abilityId The ID of the ability to roll (e.g., "str", "dex").
+ * @param {string[]} actorIds An array of actor IDs to roll for.
+ */
+export async function dmRollAbilityForActors(abilityId, actorIds) {
+  console.log(`${MODULE_ID} | Rolling ability check for ${abilityId} on actors:`, actorIds);
+
+  if (!game.settings.get(MODULE_ID, 'enableModule')) {
+    ui.notifications.warn(`${MODULE_ID} is disabled.`);
+    return;
+  }
+
+  if (!game.user.isGM) {
+    ui.notifications.error(`You are not the GM.`);
+    return;
+  }
+
+  if (!abilityId) {
+    ui.notifications.error(`An ability ID must be provided.`);
+    return;
+  }
+
+  const rollVisibility = game.settings.get(MODULE_ID, 'rollVisibility');
+  const gmId = game.users.find(u => u.isGM)?.id;
+
+  for (const actorId of actorIds) {
+    const actor = game.actors.get(actorId);
+    if (!actor) {
+      console.warn(`${MODULE_ID} | Actor ${actorId} not found.`);
+      continue;
+    }
+
+    try {
+      const ability = actor.system.abilities[abilityId];
+      if (!ability) {
+        throw new Error(`Ability ${abilityId} not found on actor ${actor.name}`);
+      }
+
+      const modifier = ability.mod || ability.value || 0;
+      const rollFormula = `1d20${modifier >= 0 ? '+' : ''}${modifier}`;
+      const rollLabel = `${CONFIG.DND5E.abilities[abilityId]?.label || abilityId.toUpperCase()} Check (${actor.name})`;
+
+      const roll = new Roll(rollFormula, actor.getRollData());
+      await roll.evaluate({ async: true });
+
+      const chatData = {
+        user: game.user.id,
+        speaker: ChatMessage.getSpeaker({ actor }),
+        flavor: rollLabel,
+        rolls: [roll],
+      };
+
+      if (rollVisibility === 'self') {
+        chatData.whisper = [gmId].filter(Boolean);
+        chatData.rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+      } else {
+        chatData.rollMode = CONST.DICE_ROLL_MODES.PUBLIC;
+      }
+
+      await ChatMessage.create(chatData);
+      console.log(`${MODULE_ID} | Rolled ${abilityId} for ${actor.name}`);
+    } catch (error) {
+      console.error(`${MODULE_ID} | Error rolling ${abilityId} for actor ${actorId}:`, error);
+    }
+  }
+
+  ui.notifications.info(
+    `Rolled ${CONFIG.DND5E.abilities[abilityId]?.label || abilityId.toUpperCase()} for ${actorIds.length} actor(s).`
+  );
+}
+
+/**
+ * Allows the GM to roll a skill check directly for actors (e.g., NPCs, creatures).
+ * @param {string} skillId The ID of the skill to roll (e.g., "ath", "per").
+ * @param {string[]} actorIds An array of actor IDs to roll for.
+ */
+export async function dmRollSkillForActors(skillId, actorIds) {
+  console.log(`${MODULE_ID} | Rolling skill check for ${skillId} on actors:`, actorIds);
+
+  if (!game.settings.get(MODULE_ID, 'enableModule')) {
+    ui.notifications.warn(`${MODULE_ID} is disabled.`);
+    return;
+  }
+
+  if (!game.user.isGM) {
+    ui.notifications.error(`You are not the GM.`);
+    return;
+  }
+
+  if (!skillId) {
+    ui.notifications.error(`A skill ID must be provided.`);
+    return;
+  }
+
+  const rollVisibility = game.settings.get(MODULE_ID, 'rollVisibility');
+  const gmId = game.users.find(u => u.isGM)?.id;
+
+  for (const actorId of actorIds) {
+    const actor = game.actors.get(actorId);
+    if (!actor) {
+      console.warn(`${MODULE_ID} | Actor ${actorId} not found.`);
+      continue;
+    }
+
+    try {
+      const skill = actor.system.skills[skillId];
+      if (!skill) {
+        throw new Error(`Skill ${skillId} not found on actor ${actor.name}`);
+      }
+
+      const modifier = skill.total || 0;
+      const rollFormula = `1d20${modifier >= 0 ? '+' : ''}${modifier}`;
+      const skillLabel = CONFIG.DND5E.skills[skillId]?.label || skillId.toUpperCase();
+      const rollLabel = `${skillLabel} Check (${actor.name})`;
+
+      const roll = new Roll(rollFormula, actor.getRollData());
+      await roll.evaluate({ async: true });
+
+      const chatData = {
+        user: game.user.id,
+        speaker: ChatMessage.getSpeaker({ actor }),
+        flavor: rollLabel,
+        rolls: [roll],
+      };
+
+      if (rollVisibility === 'self') {
+        chatData.whisper = [gmId].filter(Boolean);
+        chatData.rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
+      } else {
+        chatData.rollMode = CONST.DICE_ROLL_MODES.PUBLIC;
+      }
+
+      await ChatMessage.create(chatData);
+      console.log(`${MODULE_ID} | Rolled ${skillId} for ${actor.name}`);
+    } catch (error) {
+      console.error(`${MODULE_ID} | Error rolling ${skillId} for actor ${actorId}:`, error);
+    }
+  }
+
+  const skillLabel = CONFIG.DND5E.skills[skillId]?.label || skillId.toUpperCase();
+  ui.notifications.info(`Rolled ${skillLabel} for ${actorIds.length} actor(s).`);
+}
+
+/**
  * Handles the player's roll when they click the button in the GM's message.
  * @param {string} abilityId The ID of the ability to roll (e.g., "str", "dex").
  * @param {string} userId The ID of the user making the roll.

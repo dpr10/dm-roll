@@ -1,5 +1,10 @@
 import { initializeUI } from './ui.js';
-import { dmRollAbilityForPlayers, dmRollSkillForPlayers } from './core.js';
+import {
+  dmRollAbilityForPlayers,
+  dmRollSkillForPlayers,
+  dmRollAbilityForActors,
+  dmRollSkillForActors,
+} from './core.js';
 
 const MODULE_ID = 'dm-roll';
 
@@ -37,6 +42,8 @@ Hooks.once('ready', async function () {
   // Expose on window for macro compatibility
   window.dmRollAbilityForPlayers = dmRollAbilityForPlayers;
   window.dmRollSkillForPlayers = dmRollSkillForPlayers;
+  window.dmRollAbilityForActors = dmRollAbilityForActors;
+  window.dmRollSkillForActors = dmRollSkillForActors;
 
   // Add event listener for roll buttons in chat messages
   Hooks.on('renderChatMessageHTML', (message, html, context) => {

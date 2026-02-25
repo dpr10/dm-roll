@@ -20,12 +20,14 @@ DM Roll is a Foundry VTT module that allows the Dungeon Master to roll ability c
 ## Usage
 
 ### Through UI
+
 1. Click the "DM Roll" button in the scene controls
 2. Select an ability from the dropdown
 3. Choose one or more players from the list
 4. Click "Roll" to execute the checks
 
 ### Through Macros
+
 ```javascript
 // Roll strength check for specific players
 window.dmRollAbilityForPlayers('str', ['player1Id', 'player2Id']);
@@ -38,6 +40,7 @@ window.dmRollAbilityForPlayers('dex', activePlayerIds);
 ## Configuration
 
 The module provides two key settings:
+
 1. **Enable DM Roll**: Toggle to activate/deactivate the module functionality
 2. **Roll Visibility**: Control who sees the rolled checks (DM only or DM + Players)
 
