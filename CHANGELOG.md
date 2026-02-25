@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-02-25
+
+### Fixed
+
+- Use D&D 5e system's native rolling methods for correct modifier calculation
+- Updated to Foundry VTT v13 API (`rollAbilityCheck`, `rollSkill`)
+- Deprecated `renderTemplate` replaced with `foundry.applications.handlebars.renderTemplate`
+
+### Changed
+
+- Replaced custom roll formulas with native `actor.rollAbilityCheck()` and `actor.rollSkill()` methods
+- Simplified roll logic by leveraging system's built-in modifier calculations
+- Reduced code complexity and improved maintainability
+
 ## [1.3.0] - 2026-02-25
 
 ### Added

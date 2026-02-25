@@ -49,7 +49,10 @@ export async function dmRollAbilityForPlayers(abilityId, playerIds) {
     };
 
     // Render the template
-    const content = await renderTemplate('modules/dm-roll/templates/chat-roll-request.hbs', templateData);
+    const content = await foundry.applications.handlebars.renderTemplate(
+      'modules/dm-roll/templates/chat-roll-request.hbs',
+      templateData
+    );
 
     // Create a chat message that only the target player can see
     const chatData = {
@@ -117,7 +120,10 @@ export async function dmRollSkillForPlayers(skillId, playerIds) {
     };
 
     // Render the template
-    const content = await renderTemplate('modules/dm-roll/templates/chat-roll-request.hbs', templateData);
+    const content = await foundry.applications.handlebars.renderTemplate(
+      'modules/dm-roll/templates/chat-roll-request.hbs',
+      templateData
+    );
 
     // Create a chat message that only the target player can see
     const chatData = {
@@ -169,33 +175,14 @@ export async function dmRollAbilityForActors(abilityId, actorIds) {
     }
 
     try {
-      const ability = actor.system.abilities[abilityId];
-      if (!ability) {
-        throw new Error(`Ability ${abilityId} not found on actor ${actor.name}`);
-      }
-
-      const modifier = ability.mod || ability.value || 0;
-      const rollFormula = `1d20${modifier >= 0 ? '+' : ''}${modifier}`;
-      const rollLabel = `${CONFIG.DND5E.abilities[abilityId]?.label || abilityId.toUpperCase()} Check (${actor.name})`;
-
-      const roll = new Roll(rollFormula, actor.getRollData());
-      await roll.evaluate({ async: true });
-
-      const chatData = {
-        user: game.user.id,
-        speaker: ChatMessage.getSpeaker({ actor }),
-        flavor: rollLabel,
-        rolls: [roll],
+      const config = { ability: abilityId };
+      const dialog = { configure: false };
+      const message = {
+        create: true,
+        rollMode: rollVisibility === 'self' ? CONST.DICE_ROLL_MODES.PRIVATE : CONST.DICE_ROLL_MODES.PUBLIC,
       };
 
-      if (rollVisibility === 'self') {
-        chatData.whisper = [gmId].filter(Boolean);
-        chatData.rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
-      } else {
-        chatData.rollMode = CONST.DICE_ROLL_MODES.PUBLIC;
-      }
-
-      await ChatMessage.create(chatData);
+      await actor.rollAbilityCheck(config, dialog, message);
       console.log(`${MODULE_ID} | Rolled ${abilityId} for ${actor.name}`);
     } catch (error) {
       console.error(`${MODULE_ID} | Error rolling ${abilityId} for actor ${actorId}:`, error);
@@ -241,34 +228,14 @@ export async function dmRollSkillForActors(skillId, actorIds) {
     }
 
     try {
-      const skill = actor.system.skills[skillId];
-      if (!skill) {
-        throw new Error(`Skill ${skillId} not found on actor ${actor.name}`);
-      }
-
-      const modifier = skill.total || 0;
-      const rollFormula = `1d20${modifier >= 0 ? '+' : ''}${modifier}`;
-      const skillLabel = CONFIG.DND5E.skills[skillId]?.label || skillId.toUpperCase();
-      const rollLabel = `${skillLabel} Check (${actor.name})`;
-
-      const roll = new Roll(rollFormula, actor.getRollData());
-      await roll.evaluate({ async: true });
-
-      const chatData = {
-        user: game.user.id,
-        speaker: ChatMessage.getSpeaker({ actor }),
-        flavor: rollLabel,
-        rolls: [roll],
+      const config = { skill: skillId };
+      const dialog = { configure: false };
+      const message = {
+        create: true,
+        rollMode: rollVisibility === 'self' ? CONST.DICE_ROLL_MODES.PRIVATE : CONST.DICE_ROLL_MODES.PUBLIC,
       };
 
-      if (rollVisibility === 'self') {
-        chatData.whisper = [gmId].filter(Boolean);
-        chatData.rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
-      } else {
-        chatData.rollMode = CONST.DICE_ROLL_MODES.PUBLIC;
-      }
-
-      await ChatMessage.create(chatData);
+      await actor.rollSkill(config, dialog, message);
       console.log(`${MODULE_ID} | Rolled ${skillId} for ${actor.name}`);
     } catch (error) {
       console.error(`${MODULE_ID} | Error rolling ${skillId} for actor ${actorId}:`, error);
@@ -300,71 +267,25 @@ export async function handlePlayerRoll(abilityId, userId, type = 'ability') {
   const actor = user.character;
 
   try {
-    let rollFormula;
-    let rollLabel;
+    const rollVisibility = game.settings.get(MODULE_ID, 'rollVisibility');
+    const config = type === 'ability' ? { ability: abilityId } : { skill: abilityId };
+    const dialog = { configure: false };
+    const message = {
+      create: true,
+      rollMode: rollVisibility === 'self' ? CONST.DICE_ROLL_MODES.PRIVATE : CONST.DICE_ROLL_MODES.PUBLIC,
+    };
 
     if (type === 'ability') {
-      // Get the ability data
-      const ability = actor.system.abilities[abilityId];
-      if (!ability) {
-        throw new Error(`Ability ${abilityId} not found on actor`);
-      }
-
-      // Calculate the ability modifier
-      const modifier = ability.mod || ability.value || 0;
-
-      // Create the roll formula (1d20 + modifier)
-      rollFormula = `1d20${modifier >= 0 ? '+' : ''}${modifier}`;
-      rollLabel = `${CONFIG.DND5E.abilities[abilityId]?.label || abilityId.toUpperCase()} Check (${actor.name})`;
+      await actor.rollAbilityCheck(config, dialog, message);
     } else if (type === 'skill') {
-      // Get the skill data
-      const skill = actor.system.skills[abilityId];
-      if (!skill) {
-        throw new Error(`Skill ${abilityId} not found on actor`);
-      }
-
-      // Calculate the skill modifier
-      const modifier = skill.total || 0;
-
-      // Create the roll formula (1d20 + modifier)
-      rollFormula = `1d20${modifier >= 0 ? '+' : ''}${modifier}`;
-      const skillLabel = CONFIG.DND5E.skills[abilityId]?.label || abilityId.toUpperCase();
-      rollLabel = `${skillLabel} Check (${actor.name})`;
+      await actor.rollSkill(config, dialog, message);
     } else {
       throw new Error(`Unknown roll type: ${type}`);
     }
 
-    // Create and execute the roll
-    const roll = new Roll(rollFormula, actor.getRollData());
-    await roll.evaluate({ async: true });
-
-    // Determine roll visibility based on module settings
-    const rollVisibility = game.settings.get(MODULE_ID, 'rollVisibility');
-    const isPrivate = rollVisibility === 'self';
-
-    // Create the chat message with appropriate visibility
-    const chatData = {
-      user: game.user.id,
-      speaker: ChatMessage.getSpeaker({ actor: actor }),
-      flavor: rollLabel,
-      rolls: [roll],
-    };
-
-    // Apply visibility settings
-    if (isPrivate) {
-      // If private, whisper to the GM only
-      chatData.whisper = [game.users.find(u => u.isGM)?.id].filter(Boolean);
-      chatData.rollMode = CONST.DICE_ROLL_MODES.PRIVATE;
-    } else {
-      // If public, make it visible to all
-      chatData.rollMode = CONST.DICE_ROLL_MODES.PUBLIC;
-    }
-
-    // Display the roll in chat
-    await ChatMessage.create(chatData);
-
-    console.log(`${MODULE_ID} | Player rolled ${abilityId} successfully`);
-    ui.notifications.info(`You rolled ${rollLabel}`);
+    const label = type === 'ability' ? CONFIG.DND5E.abilities[abilityId]?.label : CONFIG.DND5E.skills[abilityId]?.label;
+    console.log(`${MODULE_ID} | Player rolled ${label} successfully`);
+    ui.notifications.info(`You rolled ${label} Check (${actor.name})`);
   } catch (error) {
     console.error(`${MODULE_ID} | Error rolling for player:`, error);
     ui.notifications.error(`Failed to roll. See console for details.`);

@@ -22,19 +22,28 @@ async function openDmRollDialog() {
 
   const gmCharacterId = game.user.character?.id;
 
+  const playerCharacterIds = new Set(
+    game.users
+      .filter(u => u.character && !u.isGM && u.active)
+      .map(u => u.character.id)
+  );
+
   const selectedTokens = canvas.tokens?.controlled || [];
   const selectedActors = [];
 
   for (const token of selectedTokens) {
     if (!token.actor) continue;
     if (token.actor.id === gmCharacterId) continue;
+    if (playerCharacterIds.has(token.actor.id)) continue;
     selectedActors.push({
       value: token.actor.id,
       label: token.actor.name,
     });
   }
 
-  const players = game.users.filter(u => u.character && !u.isGM && u.active).map(u => ({ value: u.id, label: u.name }));
+  const players = game.users
+    .filter(u => u.character && !u.isGM && u.active)
+    .map(u => ({ value: u.id, label: u.name }));
 
   if (players.length === 0 && selectedActors.length === 0) {
     ui.notifications.warn('No players or tokens found to roll for.');
